@@ -30,3 +30,6 @@ secrets/
 # Burrito single-file release output directory
 /burrito_out/
 
+# Escript CLI executable
+/subconverter
+
