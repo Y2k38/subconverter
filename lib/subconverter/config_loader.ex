@@ -6,6 +6,13 @@ defmodule Subconverter.ConfigLoader do
   """
 
   def load do
+    load_sources()
+    configure_application()
+
+    :ok
+  end
+
+  defp load_sources do
     # Phase 1: Fetch Raw Configurations (.env, ETCD, etc.)
     # First, we fetch from local sources (.env) and system environment variables,
     # converting everything into basic strings and injecting them into the OS level.
@@ -22,7 +29,9 @@ defmodule Subconverter.ConfigLoader do
     #   remote_config = EtcdClient.fetch!("/subconverter/config")
     #   System.put_env(remote_config)
     # end
+  end
 
+  defp configure_application do
     # Phase 2: Configuration Extraction, Validation & Casting
     # Now that ALL raw string-based configurations are gathered in the OS layer,
     # we parse, validate, and crash early if critical variables are missing or invalid.
@@ -39,6 +48,7 @@ defmodule Subconverter.ConfigLoader do
     # so the rest of the app (e.g., application.ex, router.ex) can use it safely.
     Application.put_env(:subconverter, :port, port)
 
-    :ok
+    secret_dir = System.get_env("SECRET_DIR") || raise "SECRET_DIR environment variable is missing!"
+    Application.put_env(:subconverter, :secret_dir, secret_dir)
   end
 end

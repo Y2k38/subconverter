@@ -4,7 +4,7 @@ defmodule Subconverter.MixProject do
   def project do
     [
       app: :subconverter,
-      version: "0.1.2",
+      version: "0.1.5",
       elixir: "~> 1.19",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -14,10 +14,12 @@ defmodule Subconverter.MixProject do
   end
 
   def releases do
-    if System.find_executable("zig") do
+    # Force standard release via environment variable for testing purposes,
+    # or fallback to checking if zig is installed.
+    if System.get_env("FORCE_STANDARD_RELEASE") != "true" && System.find_executable("zig") do
       [
         subconverter_app: [
-          steps: [:assemble, &Burrito.wrap/1],
+          steps: [:assemble, &Burrito.wrap/1, &compress_burrito/1],
           burrito: [
             targets: [
               linux: [os: :linux, cpu: :x86_64]
@@ -26,11 +28,62 @@ defmodule Subconverter.MixProject do
         ]
       ]
     else
-      IO.puts("⚠️  Zig compiler not found. Falling back to standard Elixir Mix Release...")
-      [
-        subconverter_app: []
-      ]
+      IO.puts("⚠️  Using standard Elixir Mix Release (Zig skipped or disabled)...")
+      [subconverter_app: [steps: [:assemble, &compress_standard/1]]]
     end
+  end
+
+  defp compress_burrito(release) do
+    version = release.version
+    app_name = release.name
+    burrito_opts = release.options[:burrito]
+
+    if burrito_opts && burrito_opts[:targets] do
+      Enum.each(burrito_opts[:targets], fn {target_alias, _} ->
+        binary_name = "#{app_name}_#{target_alias}"
+        binary_path = Path.join("burrito_out", binary_name)
+        tar_gz_name = "#{app_name}_v#{version}_#{target_alias}.tar.gz"
+        tar_gz_path = Path.join("burrito_out", tar_gz_name)
+
+        if File.exists?(binary_path) do
+          Mix.shell().info("📦 Compressing #{binary_name} → #{tar_gz_name} ...")
+          {_out, 0} = System.cmd("tar", ["-czf", tar_gz_name, binary_name], cd: "burrito_out")
+          write_checksum(tar_gz_path, tar_gz_name)
+        end
+      end)
+    end
+
+    release
+  end
+
+  defp compress_standard(release) do
+    version = release.version
+    app_name = release.name
+    release_dir = Path.dirname(release.path)
+    target_dir = Path.basename(release.path)
+    tar_gz_name = "#{app_name}_v#{version}.tar.gz"
+    tar_gz_path = Path.join(release_dir, tar_gz_name)
+
+    if File.dir?(release.path) do
+      Mix.shell().info("📦 Compressing #{target_dir} → #{tar_gz_name} ...")
+      {_out, 0} = System.cmd("tar", ["-czf", tar_gz_name, target_dir], cd: release_dir)
+      write_checksum(tar_gz_path, tar_gz_name)
+    end
+
+    release
+  end
+
+  defp write_checksum(tar_gz_path, tar_gz_name) do
+    Mix.shell().info("🔐 Generating SHA256 checksum ...")
+
+    hash_hex =
+      tar_gz_path
+      |> File.read!()
+      |> then(&:crypto.hash(:sha256, &1))
+      |> Base.encode16(case: :lower)
+
+    File.write!(tar_gz_path <> ".sha256", "#{hash_hex}  #{tar_gz_name}\n")
+    Mix.shell().info("✅ #{tar_gz_path}")
   end
 
   # Run "mix help compile.app" to learn about applications.
