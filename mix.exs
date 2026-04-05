@@ -8,7 +8,8 @@ defmodule Subconverter.MixProject do
       elixir: "~> 1.19",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      releases: releases()
+      releases: releases(),
+      escript: [main_module: Subconverter.CLI, name: "subconverter", app: nil]
     ]
   end
 
@@ -48,7 +49,8 @@ defmodule Subconverter.MixProject do
       {:plug_cowboy, "~> 2.8"},
       {:bandit, "~> 1.10"},
       {:dotenvy, "~> 1.1"},
-      {:burrito, "~> 1.5"}
+      {:burrito, "~> 1.5"},
+      {:eqrcode, "~> 0.2.1"}
     ]
   end
 end
