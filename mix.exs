@@ -7,8 +7,29 @@ defmodule Subconverter.MixProject do
       version: "0.1.0",
       elixir: "~> 1.19",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      releases: releases()
     ]
+  end
+
+  def releases do
+    if System.find_executable("zig") do
+      [
+        subconverter_app: [
+          steps: [:assemble, &Burrito.wrap/1],
+          burrito: [
+            targets: [
+              linux: [os: :linux, cpu: :x86_64]
+            ]
+          ]
+        ]
+      ]
+    else
+      IO.puts("⚠️  Zig compiler not found. Falling back to standard Elixir Mix Release...")
+      [
+        subconverter_app: []
+      ]
+    end
   end
 
   # Run "mix help compile.app" to learn about applications.
@@ -26,7 +47,8 @@ defmodule Subconverter.MixProject do
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
       {:plug_cowboy, "~> 2.8"},
       {:bandit, "~> 1.10"},
-      {:dotenvy, "~> 1.1"}
+      {:dotenvy, "~> 1.1"},
+      {:burrito, "~> 1.5"}
     ]
   end
 end
