@@ -5,7 +5,11 @@ defmodule Subconverter.Handlers.Subscription do
   it with proper HTTP caching headers (ETag / Last-Modified).
   """
 
+  use Plug.Router
   import Plug.Conn
+
+  plug :match
+  plug :dispatch
 
   # Maps known User-Agent substrings to their corresponding config filenames.
   @ua_map %{
@@ -13,8 +17,9 @@ defmodule Subconverter.Handlers.Subscription do
     "shadowrocket" => "shadowrocket.txt"
   }
 
-  def call(conn, _user_id, _token) do
+  get "/:user_id/:token" do
     # TODO: Validate user_id and token against a secrets store.
+    # Note: Path parameters matched in the router (such as user_id and token) are already bound as variables here.
     ua =
       conn
       |> get_req_header("user-agent")
@@ -34,6 +39,10 @@ defmodule Subconverter.Handlers.Subscription do
       filename ->
         serve_file(conn, filename)
     end
+  end
+
+  match _ do
+    send_resp(conn, 404, "Not Found")
   end
 
   defp resolve_filename(ua, secret_dir) do

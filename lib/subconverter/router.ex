@@ -6,9 +6,7 @@ defmodule Subconverter.Router do
   plug :match
   plug :dispatch
 
-  get "/subscribe/:user_id/:token" do
-    Subconverter.Handlers.Subscription.call(conn, user_id, token)
-  end
+  forward "/subscribe", to: Subconverter.Handlers.Subscription
 
   match _ do
     send_resp(conn, 404, "Not Found")
