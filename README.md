@@ -2,20 +2,20 @@
 
 **TODO: Add description**
 
-## Installation
+## Building from Source
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `subconverter` to your list of dependencies in `mix.exs`:
+This project is built as an executable application. Its versioning is decoupled from the codebase and is designed to be injected dynamically via CI/CD pipelines (e.g., using Git tags or commit hashes).
 
-```elixir
-def deps do
-  [
-    {:subconverter, "~> 0.1.0"}
-  ]
-end
+To build a release locally (e.g., with Burrito) and inject a version, use the `APP_VERSION` environment variable:
+
+```bash
+# Example using git tags/hashes for dynamic versioning with production optimizations
+MIX_ENV=prod APP_VERSION=$(git describe --tags --always) mix release
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/subconverter>.
+To run the application locally in development mode:
+
+```bash
+APP_VERSION=dev mix run --no-halt
+```
 

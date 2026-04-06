@@ -1,10 +1,14 @@
 defmodule Subconverter.MixProject do
   use Mix.Project
 
+  # Decouple versioning from codebase by injecting via CI/CD (tags, commit hashes, etc.).
+  # Note: Libraries published to Hex still require a hardcoded version here.
+  @app_version System.get_env("APP_VERSION") || "0.1.0"
+
   def project do
     [
       app: :subconverter,
-      version: "0.1.6",
+      version: @app_version,
       elixir: "~> 1.19",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
