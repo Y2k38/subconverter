@@ -50,5 +50,11 @@ defmodule Subconverter.ConfigLoader do
 
     secret_dir = System.get_env("SECRET_DIR") || raise "SECRET_DIR environment variable is missing!"
     Application.put_env(:subconverter, :secret_dir, secret_dir)
+
+    user_id = System.get_env("USER_ID") || raise "USER_ID environment variable is missing!"
+    Application.put_env(:subconverter, :user_id, user_id)
+
+    token = System.get_env("TOKEN") || raise "TOKEN environment variable is missing!"
+    Application.put_env(:subconverter, :token, token)
   end
 end

@@ -18,7 +18,12 @@ defmodule Subconverter.Handlers.Subscription do
   }
 
   get "/:user_id/:token" do
-    # TODO: Validate user_id and token against a secrets store.
+    # Validate user_id and token against a secrets store.
+    if user_id != Application.fetch_env!(:subconverter, :user_id) ||
+      token != Application.fetch_env!(:subconverter, :token) do
+      send_resp(conn, 404, "Not Found")
+    end
+
     # Note: Path parameters matched in the router (such as user_id and token) are already bound as variables here.
     ua =
       conn
