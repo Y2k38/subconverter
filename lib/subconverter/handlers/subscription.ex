@@ -82,6 +82,8 @@ defmodule Subconverter.Handlers.Subscription do
               conn
               |> put_resp_header("etag", etag)
               |> put_resp_header("last-modified", last_modified)
+              |> put_resp_header("profile-update-interval", "24")
+              # |> put_resp_header("subscription-userinfo", "upload=0; download=0; total=0; expire=0")
               |> send_resp(200, content)
           end
         end

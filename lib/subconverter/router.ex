@@ -1,6 +1,8 @@
 defmodule Subconverter.Router do
   use Plug.Router
 
+  plug RemoteIp
+
   # Log every incoming HTTP request for observability
   plug Subconverter.Plugs.RequestLogger
   plug :match

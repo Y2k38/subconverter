@@ -105,6 +105,7 @@ defmodule Subconverter.MixProject do
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
       {:plug_cowboy, "~> 2.8"},
       {:bandit, "~> 1.10"},
+      {:remote_ip, "~> 1.2"},
       {:dotenvy, "~> 1.1"},
       {:burrito, "~> 1.5"},
       {:eqrcode, "~> 0.2.1"}
